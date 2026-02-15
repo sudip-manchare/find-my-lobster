@@ -42,11 +42,19 @@ PORT = int_env("LOBSTERLINK_PORT", 8080)
 FRONTEND_DIR = Path(__file__).parent / "frontend"
 DATINGOPENCLAW_BASE_URL = os.getenv("DATINGOPENCLAW_BASE_URL", "https://datingopenclaw.com/api").rstrip("/")
 DEFAULT_CHAT_HISTORY_LIMIT = 50
-SESSION_TTL_SECONDS = int_env("LOBSTERLINK_SESSION_TTL_SECONDS", 60 * 60 * 24 * 30)
+DEFAULT_SESSION_TTL_SECONDS = 60 * 60 * 24 * 30
+RAW_SESSION_TTL_SECONDS = int_env("LOBSTERLINK_SESSION_TTL_SECONDS", DEFAULT_SESSION_TTL_SECONDS)
+# Guardrail: reject zero/negative/super-low TTLs that can invalidate sessions immediately in production.
+SESSION_TTL_SECONDS = RAW_SESSION_TTL_SECONDS if RAW_SESSION_TTL_SECONDS >= 300 else DEFAULT_SESSION_TTL_SECONDS
 
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def session_expires_at(from_dt: datetime | None = None) -> str:
+    base = (from_dt or datetime.now(timezone.utc)).replace(microsecond=0)
+    return (base + timedelta(seconds=SESSION_TTL_SECONDS)).isoformat()
 
 
 def parse_iso(ts: str) -> datetime:
@@ -180,8 +188,7 @@ def ensure_db() -> None:
         session_columns = {row[1] for row in cur.execute("PRAGMA table_info(user_sessions)")}
         if "expires_at" not in session_columns:
             cur.execute("ALTER TABLE user_sessions ADD COLUMN expires_at TEXT")
-            now = utc_now()
-            cur.execute("UPDATE user_sessions SET expires_at = ? WHERE expires_at IS NULL", (now,))
+            cur.execute("UPDATE user_sessions SET expires_at = ? WHERE expires_at IS NULL", (session_expires_at(),))
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON user_sessions(expires_at)")
         cur.execute(
@@ -543,16 +550,12 @@ class AppHandler(BaseHTTPRequestHandler):
         now = utc_now()
         con = get_connection()
         try:
-            con.execute(
-                "DELETE FROM user_sessions WHERE expires_at IS NOT NULL AND expires_at <= ?",
-                (now,),
-            )
             row = con.execute(
                 """
                 SELECT u.id, u.email, s.token AS session_token
                 FROM user_sessions s
                 JOIN users u ON u.id = s.user_id
-                WHERE s.token = ? AND (s.expires_at IS NULL OR s.expires_at > ?)
+                WHERE s.token = ? AND (s.expires_at IS NULL OR s.expires_at >= ?)
                 """,
                 (token, now),
             ).fetchone()
@@ -570,10 +573,6 @@ class AppHandler(BaseHTTPRequestHandler):
         now = utc_now()
         con = get_connection()
         try:
-            con.execute(
-                "DELETE FROM user_sessions WHERE expires_at IS NOT NULL AND expires_at <= ?",
-                (now,),
-            )
             row = con.execute("SELECT * FROM agents WHERE api_key = ?", (token,)).fetchone()
             if row is not None:
                 return row
@@ -582,14 +581,14 @@ class AppHandler(BaseHTTPRequestHandler):
                 SELECT a.*
                 FROM user_sessions s
                 JOIN agents a ON a.user_id = s.user_id
-                WHERE s.token = ? AND (s.expires_at IS NULL OR s.expires_at > ?)
+                WHERE s.token = ? AND (s.expires_at IS NULL OR s.expires_at >= ?)
                 """,
                 (token, now),
             ).fetchone()
             if row is not None:
                 return row
             user_exists = con.execute(
-                "SELECT 1 FROM user_sessions WHERE token = ? AND (expires_at IS NULL OR expires_at > ?)",
+                "SELECT 1 FROM user_sessions WHERE token = ? AND (expires_at IS NULL OR expires_at >= ?)",
                 (token, now),
             ).fetchone()
             if user_exists:
@@ -837,8 +836,9 @@ class AppHandler(BaseHTTPRequestHandler):
 
     def _create_user_session(self, user_id: str) -> str:
         token = "lls_" + secrets.token_urlsafe(24)
-        now = utc_now()
-        expires_at = (datetime.now(timezone.utc) + timedelta(seconds=SESSION_TTL_SECONDS)).replace(microsecond=0).isoformat()
+        now_dt = datetime.now(timezone.utc).replace(microsecond=0)
+        now = now_dt.isoformat()
+        expires_at = session_expires_at(now_dt)
         con = get_connection()
         try:
             con.execute(
