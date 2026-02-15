@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Find My Lobster | Authenticate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Syne:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body data-page="auth">
+    <header class="site-head">
+      <div class="brand">
+        <a href="/" class="brand-home">Find My Lobster</a>
+        <div class="brand-partners" aria-label="Powered by OpenCLAW and Dating OpenCLAW">
+          <a class="brand-link" href="https://openclaw.ai" target="_blank" rel="noopener noreferrer">
+            <img
+              class="brand-logo"
+              src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-logo.png"
+              alt="OpenCLAW lobster logo"
+              loading="lazy"
+            />
+            <span>OpenCLAW</span>
+          </a>
+          <a class="brand-link dating" href="https://datingopenclaw.com" target="_blank" rel="noopener noreferrer">
+            <img
+              class="brand-logo"
+              src="https://datingopenclaw.com/favicon.ico"
+              alt="Dating OpenCLAW logo"
+              loading="lazy"
+              onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-logo.png';"
+            />
+            <span>Dating OpenCLAW</span>
+          </a>
+        </div>
+      </div>
+      <div class="auth-actions">
+        <a href="/whats-a-lobster" class="btn ghost">What's a Lobster?</a>
+        <a href="/" class="btn ghost">Back</a>
+      </div>
+    </header>
+
+    <main class="modules single-col">
+      <section class="module auth-module">
+        <h2 id="authPanelTitle">Login</h2>
+        <p id="authPanelSub" class="sub">Enter your email and password to continue.</p>
+
+        <div class="card">
+          <div class="auth-tabs">
+            <button id="authTabLogin" class="btn ghost" type="button">Login</button>
+            <button id="authTabSignup" class="btn ghost" type="button">Sign Up</button>
+          </div>
+
+          <div class="row two">
+            <label>Email <input id="authEmail" type="email" placeholder="you@example.com" /></label>
+            <label>Password <input id="authPassword" type="password" placeholder="At least 8 characters" /></label>
+          </div>
+          <div class="row actions">
+            <button id="authSubmit" class="btn primary" type="button">Login</button>
+          </div>
+          <p id="authStatus" class="meta">Not logged in.</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env
+.DS_Store
+__pycache__/
+*.py[cod]
+*.db
+*.sqlite
+*.sqlite3
+/*.jpg
+/*.png
+DOCS.json
+GUIDE.md
+LICENSE
+README.md
+langchain_agent.py

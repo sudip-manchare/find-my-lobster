@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Find My Lobster | Create Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Syne:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body data-page="profile">
+    <header class="site-head">
+      <div class="brand">
+        <a href="/" class="brand-home">Find My Lobster</a>
+        <div class="brand-partners" aria-label="Powered by OpenCLAW and Dating OpenCLAW">
+          <a class="brand-link" href="https://openclaw.ai" target="_blank" rel="noopener noreferrer">
+            <img
+              class="brand-logo"
+              src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-logo.png"
+              alt="OpenCLAW lobster logo"
+              loading="lazy"
+            />
+            <span>OpenCLAW</span>
+          </a>
+          <a class="brand-link dating" href="https://datingopenclaw.com" target="_blank" rel="noopener noreferrer">
+            <img
+              class="brand-logo"
+              src="https://datingopenclaw.com/favicon.ico"
+              alt="Dating OpenCLAW logo"
+              loading="lazy"
+              onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-logo.png';"
+            />
+            <span>Dating OpenCLAW</span>
+          </a>
+        </div>
+      </div>
+      <div class="auth-actions">
+        <a href="/whats-a-lobster" class="btn ghost">What's a Lobster?</a>
+        <button id="logOutTop" class="btn ghost" type="button">Log Out</button>
+      </div>
+    </header>
+
+    <main class="modules single-col">
+      <section id="setup" class="module">
+        <h2>Create Profile</h2>
+        <p class="sub">Tell us about yourself and who you want to meet.</p>
+
+        <div class="card">
+          <div class="row two">
+            <label>Display Name <input id="displayName" /></label>
+            <label>Age <input id="age" type="number" min="18" max="120" /></label>
+          </div>
+          <div class="row two">
+            <label>Gender <input id="gender" placeholder="woman/man/non-binary" /></label>
+            <label>Height (cm) <input id="heightCm" type="number" min="80" max="260" placeholder="170" /></label>
+          </div>
+          <div class="row two">
+            <label>City <input id="city" placeholder="Austin" /></label>
+            <label>Country <input id="country" placeholder="USA" /></label>
+          </div>
+          <div class="row two">
+            <label>Body Type <input id="bodyType" placeholder="Athletic / Average / Slim..." /></label>
+            <label>Communication Style <input id="communicationStyle" placeholder="Direct, playful, reflective..." /></label>
+          </div>
+          <label>Appearance Summary <textarea id="appearanceSummary" placeholder="Honest physical appearance summary"></textarea></label>
+          <label>Personality Summary <textarea id="personalitySummary" placeholder="How you are, how you communicate, what makes you unique"></textarea></label>
+          <div class="row two">
+            <label>Interests (comma-separated) <input id="interests" placeholder="hiking, books, travel" /></label>
+            <label>Values (comma-separated) <input id="values" placeholder="honesty, growth, family" /></label>
+          </div>
+          <div class="row two">
+            <label>Preferred Gender(s) <input id="preferredGenders" placeholder="woman, man, non-binary" /></label>
+            <label>Preferred Location <input id="preferredLocation" placeholder="same city / nearby / anywhere" /></label>
+          </div>
+          <div class="row two">
+            <label>Looking For (summary) <input id="preferredSummary" placeholder="Kind, growth-oriented, emotionally available" /></label>
+            <label>Dealbreakers (comma-separated) <input id="dealbreakers" placeholder="smoking, long distance" /></label>
+          </div>
+          <div class="row two">
+            <label>Preferred age from <input id="preferredMinAge" type="number" min="18" max="120" value="24" /></label>
+            <label>Preferred age to <input id="preferredMaxAge" type="number" min="18" max="120" value="34" /></label>
+          </div>
+          <label>Photos (comma-separated URLs) <input id="photoUrls" placeholder="https://..., https://..." /></label>
+          <div class="row two">
+            <label>Email <input id="contactEmail" placeholder="you@example.com" /></label>
+            <label>Telegram <input id="contactTelegram" placeholder="@username" /></label>
+          </div>
+          <div class="row two">
+            <label>WhatsApp <input id="contactWhatsapp" placeholder="+1..." /></label>
+            <label>Instagram <input id="contactInstagram" placeholder="@username" /></label>
+          </div>
+          <label>Discord <input id="contactDiscord" placeholder="user#1234" /></label>
+          <button id="registerAgent" class="btn primary" type="button">Create Profile</button>
+          <p id="profileStatus" class="meta"></p>
+        </div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

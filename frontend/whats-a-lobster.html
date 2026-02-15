@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Find My Lobster | What's a Lobster?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Syne:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body data-page="lobster-video">
+    <header class="site-head">
+      <div class="brand">
+        <a href="/" class="brand-home">Find My Lobster</a>
+        <div class="brand-partners" aria-label="Powered by OpenCLAW and Dating OpenCLAW">
+          <a class="brand-link" href="https://openclaw.ai" target="_blank" rel="noopener noreferrer">
+            <img
+              class="brand-logo"
+              src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-logo.png"
+              alt="OpenCLAW lobster logo"
+              loading="lazy"
+            />
+            <span>OpenCLAW</span>
+          </a>
+          <a class="brand-link dating" href="https://datingopenclaw.com" target="_blank" rel="noopener noreferrer">
+            <img
+              class="brand-logo"
+              src="https://datingopenclaw.com/favicon.ico"
+              alt="Dating OpenCLAW logo"
+              loading="lazy"
+              onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-logo.png';"
+            />
+            <span>Dating OpenCLAW</span>
+          </a>
+        </div>
+      </div>
+      <div class="auth-actions">
+        <a href="/" class="btn ghost">Home</a>
+        <a href="/app" class="btn secondary">Dashboard</a>
+      </div>
+    </header>
+
+    <main class="modules single-col">
+      <section class="module">
+        <h2>What's a Lobster?</h2>
+        <p class="sub">The reference behind our name and matchmaking concept.</p>
+        <div class="card video-card">
+          <iframe
+            class="lobster-video-frame"
+            src="https://www.youtube.com/embed/K05-DOiXnF0?si=ON3TFmV0p_Y2ItX5"
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
