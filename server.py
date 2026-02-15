@@ -389,6 +389,10 @@ class AppHandler(BaseHTTPRequestHandler):
                 user = self._require_auth_user()
                 self._send_json(200, self._agent_chat_history(user))
                 return
+            if method == "POST" and path == "/api/agent/chat/clear":
+                user = self._require_auth_user()
+                self._send_json(200, self._clear_agent_chat_history(user))
+                return
             if method == "POST" and path == "/api/agent/chat":
                 user = self._require_auth_user()
                 payload = self._read_json_body()
@@ -474,6 +478,7 @@ class AppHandler(BaseHTTPRequestHandler):
                 {"method": "GET", "path": "/api/auth/me", "auth": True},
                 {"method": "POST", "path": "/api/auth/logout", "auth": True},
                 {"method": "GET", "path": "/api/agent/chat/history", "auth": True},
+                {"method": "POST", "path": "/api/agent/chat/clear", "auth": True},
                 {"method": "POST", "path": "/api/agent/chat", "auth": True},
                 {"method": "POST", "path": "/api/agents/register", "auth": False},
                 {"method": "GET", "path": "/api/agents/profile", "auth": True},
@@ -1616,6 +1621,18 @@ class AppHandler(BaseHTTPRequestHandler):
             for row in reversed(rows)
         ]
         return {"messages": messages}
+
+    def _clear_agent_chat_history(self, user: sqlite3.Row) -> dict[str, Any]:
+        con = get_connection()
+        try:
+            cur = con.execute(
+                "DELETE FROM agent_chat_messages WHERE user_id = ?",
+                (user["id"],),
+            )
+            con.commit()
+        finally:
+            con.close()
+        return {"ok": True, "deleted": cur.rowcount}
 
     def _parse_command_args(self, message: str) -> dict[str, str]:
         args: dict[str, str] = {}

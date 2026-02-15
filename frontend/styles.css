@@ -144,7 +144,7 @@ body {
 .hero-brand-grid {
   margin-top: 14px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
@@ -206,6 +206,7 @@ body {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 10px;
+  width: 100%;
 }
 
 .carousel {
@@ -217,6 +218,22 @@ body {
   position: relative;
   width: min(420px, 100%);
   margin: 0 auto;
+}
+
+@media (min-width: 761px) {
+  body[data-page="landing"] .modules.single-col {
+    width: min(920px, 94vw);
+  }
+
+  body[data-page="landing"] .hero h1 {
+    font-size: clamp(1.44rem, 3.42vw, 2.16rem);
+    white-space: nowrap;
+  }
+
+  body[data-page="landing"] .hero p {
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
 }
 
 .slide {
@@ -611,6 +628,17 @@ select:focus {
     padding-bottom: 86px;
   }
 
+  body[data-page="landing"] .carousel-wrap {
+    grid-template-columns: 36px minmax(0, 1fr) 36px;
+    gap: 6px;
+  }
+
+  body[data-page="landing"] .carousel {
+    width: 100%;
+    max-width: 320px;
+    min-width: 0;
+  }
+
   .site-head {
     display: grid;
     gap: 10px;
@@ -784,7 +812,8 @@ select:focus {
   }
 
   .carousel {
-    width: min(92vw, 420px);
+    width: 100%;
+    max-width: 280px;
   }
 
   .circle-btn {

@@ -970,6 +970,19 @@ async function sendAgentMessage() {
   }
 }
 
+async function clearAgentChat() {
+  try {
+    const out = await api("/api/agent/chat/clear", {
+      method: "POST",
+    });
+    state.agentMessages = [];
+    renderAgentChat();
+    log(`Agent chat cleared (${out.deleted || 0} messages).`);
+  } catch (error) {
+    log(`Could not clear agent chat: ${error.message}`);
+  }
+}
+
 function bindLandingEvents() {
   el("carouselPrev").onclick = () => {
     stepCarousel(-1);
@@ -1013,6 +1026,7 @@ function bindAppEvents() {
   el("submitDecision").onclick = submitDecision;
   el("viewContact").onclick = viewContact;
   el("agentSend").onclick = sendAgentMessage;
+  el("agentClear").onclick = clearAgentChat;
   el("agentInput").addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
