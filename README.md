@@ -29,7 +29,6 @@ Optional runtime env vars:
 - `LOBSTERLINK_HOST` (default `127.0.0.1`)
 - `LOBSTERLINK_PORT` (default `8080`)
 - `LOBSTERLINK_DB_PATH` (default `lobsterlink.db`)
-- `LOBSTERLINK_SESSION_TTL_SECONDS` (default `2592000`, i.e. 30 days)
 - `DATINGOPENCLAW_BASE_URL` (default `https://datingopenclaw.com/api`)
 
 ## Docker (Production)

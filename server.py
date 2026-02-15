@@ -17,7 +17,7 @@ import sqlite3
 import sys
 import traceback
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -42,19 +42,11 @@ PORT = int_env("LOBSTERLINK_PORT", 8080)
 FRONTEND_DIR = Path(__file__).parent / "frontend"
 DATINGOPENCLAW_BASE_URL = os.getenv("DATINGOPENCLAW_BASE_URL", "https://datingopenclaw.com/api").rstrip("/")
 DEFAULT_CHAT_HISTORY_LIMIT = 50
-DEFAULT_SESSION_TTL_SECONDS = 60 * 60 * 24 * 30
-RAW_SESSION_TTL_SECONDS = int_env("LOBSTERLINK_SESSION_TTL_SECONDS", DEFAULT_SESSION_TTL_SECONDS)
-# Guardrail: reject zero/negative/super-low TTLs that can invalidate sessions immediately in production.
-SESSION_TTL_SECONDS = RAW_SESSION_TTL_SECONDS if RAW_SESSION_TTL_SECONDS >= 300 else DEFAULT_SESSION_TTL_SECONDS
+LEGACY_SESSION_EXPIRES_AT = "9999-12-31T23:59:59+00:00"
 
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-
-
-def session_expires_at(from_dt: datetime | None = None) -> str:
-    base = (from_dt or datetime.now(timezone.utc)).replace(microsecond=0)
-    return (base + timedelta(seconds=SESSION_TTL_SECONDS)).isoformat()
 
 
 def parse_iso(ts: str) -> datetime:
@@ -188,7 +180,7 @@ def ensure_db() -> None:
         session_columns = {row[1] for row in cur.execute("PRAGMA table_info(user_sessions)")}
         if "expires_at" not in session_columns:
             cur.execute("ALTER TABLE user_sessions ADD COLUMN expires_at TEXT")
-            cur.execute("UPDATE user_sessions SET expires_at = ? WHERE expires_at IS NULL", (session_expires_at(),))
+            cur.execute("UPDATE user_sessions SET expires_at = ? WHERE expires_at IS NULL", (LEGACY_SESSION_EXPIRES_AT,))
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON user_sessions(expires_at)")
         cur.execute(
@@ -547,7 +539,6 @@ class AppHandler(BaseHTTPRequestHandler):
         token = self._bearer_token()
         if not token:
             raise ApiError(401, "Missing or invalid Authorization header")
-        now = utc_now()
         con = get_connection()
         try:
             row = con.execute(
@@ -555,9 +546,9 @@ class AppHandler(BaseHTTPRequestHandler):
                 SELECT u.id, u.email, s.token AS session_token
                 FROM user_sessions s
                 JOIN users u ON u.id = s.user_id
-                WHERE s.token = ? AND (s.expires_at IS NULL OR s.expires_at >= ?)
+                WHERE s.token = ?
                 """,
-                (token, now),
+                (token,),
             ).fetchone()
             if row is None:
                 raise ApiError(401, "Invalid session")
@@ -570,7 +561,6 @@ class AppHandler(BaseHTTPRequestHandler):
         if not token:
             raise ApiError(401, "Missing API key")
 
-        now = utc_now()
         con = get_connection()
         try:
             row = con.execute("SELECT * FROM agents WHERE api_key = ?", (token,)).fetchone()
@@ -581,15 +571,15 @@ class AppHandler(BaseHTTPRequestHandler):
                 SELECT a.*
                 FROM user_sessions s
                 JOIN agents a ON a.user_id = s.user_id
-                WHERE s.token = ? AND (s.expires_at IS NULL OR s.expires_at >= ?)
+                WHERE s.token = ?
                 """,
-                (token, now),
+                (token,),
             ).fetchone()
             if row is not None:
                 return row
             user_exists = con.execute(
-                "SELECT 1 FROM user_sessions WHERE token = ? AND (expires_at IS NULL OR expires_at >= ?)",
-                (token, now),
+                "SELECT 1 FROM user_sessions WHERE token = ?",
+                (token,),
             ).fetchone()
             if user_exists:
                 raise ApiError(409, "Complete your profile first")
@@ -836,15 +826,20 @@ class AppHandler(BaseHTTPRequestHandler):
 
     def _create_user_session(self, user_id: str) -> str:
         token = "lls_" + secrets.token_urlsafe(24)
-        now_dt = datetime.now(timezone.utc).replace(microsecond=0)
-        now = now_dt.isoformat()
-        expires_at = session_expires_at(now_dt)
+        now = utc_now()
         con = get_connection()
         try:
-            con.execute(
-                "INSERT INTO user_sessions (token, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)",
-                (token, user_id, now, expires_at),
-            )
+            session_columns = {row[1] for row in con.execute("PRAGMA table_info(user_sessions)")}
+            if "expires_at" in session_columns:
+                con.execute(
+                    "INSERT INTO user_sessions (token, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)",
+                    (token, user_id, now, LEGACY_SESSION_EXPIRES_AT),
+                )
+            else:
+                con.execute(
+                    "INSERT INTO user_sessions (token, user_id, created_at) VALUES (?, ?, ?)",
+                    (token, user_id, now),
+                )
             con.commit()
         finally:
             con.close()
